@@ -1,0 +1,36 @@
+version: '3.8'
+
+services:
+  # --- Lightweight Postgres Database ---
+  postgres:
+    image: postgres:16-alpine
+    container_name: litellm-db
+    environment:
+      POSTGRES_DB: litellm
+      POSTGRES_USER: litellm
+      POSTGRES_PASSWORD: ${LITELLM_DB_PASSWORD}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    restart: unless-stopped
+
+  # --- LiteLLM Proxy Server ---
+  litellm-proxy:
+    image: ghcr.io/berriai/litellm:main-latest
+    container_name: litellm-proxy
+    ports:
+      - "4000:4000"
+    volumes:
+      - ./config.yaml:/app/config.yaml
+      - ./model_prices.json:/app/model_prices.json
+    environment:
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - LITELLM_MASTER_KEY=${LITELLM_MASTER_KEY}
+      # This connects LiteLLM to our postgres container:
+      - DATABASE_URL=postgresql://litellm:${LITELLM_DB_PASSWORD}@postgres:5432/litellm
+    command: ["--config", "/app/config.yaml"]
+    depends_on:
+      - postgres # <--- Ensures Postgres starts before LiteLLM
+    restart: unless-stopped
+
+volumes:
+  pgdata: # <--- Keeps your budget history safe even if container restarts
