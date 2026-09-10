@@ -29,7 +29,8 @@ services:
 
   # --- LiteLLM Proxy Server ---
   litellm-proxy:
-    image: ghcr.io/berriai/litellm:main-latest
+    # image: ghcr.io/berriai/litellm:main-latest
+    build: .
     container_name: litellm-proxy
     ports:
       - "4000:4000"
@@ -45,6 +46,7 @@ services:
       # Presidio endpoints (internal docker service names)
       - PRESIDIO_ANALYZER_API_BASE=http://presidio-analyzer:3000
       - PRESIDIO_ANONYMIZER_API_BASE=http://presidio-anonymizer:3000
+      - PROXY_BASE_URL=http://localhost:4000
     command: ["--config", "/app/config.yaml"]
     depends_on:
       - postgres # <--- Ensures Postgres starts before LiteLLM
