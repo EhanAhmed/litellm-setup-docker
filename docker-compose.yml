@@ -37,6 +37,7 @@ services:
     volumes:
       - ./config.yaml:/app/config.yaml
       - ./model_prices.json:/app/model_prices.json
+      - ${CODE_REPO_PATH}:/app/code:ro
     environment:
       - OPENAI_API_KEY=${OPENAI_API_KEY}
       - LITELLM_MASTER_KEY=${LITELLM_MASTER_KEY}
@@ -56,3 +57,4 @@ services:
 
 volumes:
   pgdata: # <--- Keeps your budget history safe even if container restarts
+  
